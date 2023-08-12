@@ -107,7 +107,7 @@ public class UserService {
         followingUser.addFollowing(follow);
         return SuccessResponseDto.builder().success(true).build();
     }
-
+    @Transactional
     public SuccessResponseDto userUnfollow(UserFollowRequestDto userFollowRequestDto) {
         User user = userRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(()-> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
@@ -122,7 +122,7 @@ public class UserService {
         followRepository.delete(follow);
         return SuccessResponseDto.builder().success(true).build();
     }
-
+    @Transactional
     public List<FollowingListResponseDto> followingList(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new IllegalArgumentException("해당하는 유저가 존재하지 않습니다."));
@@ -133,7 +133,7 @@ public class UserService {
                 .map(FollowingListResponseDto::new)
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     public List<FollowerListResponseDto> followerList(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new IllegalArgumentException("해당하는 유저가 존재하지 않습니다."));
@@ -144,7 +144,7 @@ public class UserService {
                 .map(FollowerListResponseDto::new)
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     public List<UserListResponseDto> searchName(String name) {
         List<User> users = userRepository.findByNameContaining(name);
         //팔로워 순으로 내림차순 정렬
