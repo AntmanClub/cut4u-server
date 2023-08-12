@@ -122,7 +122,7 @@ public class PostsService {
         List<PostsDto> postsDtoList = postsListToPostsDtoList(postsList);    // postsList to postsDtoList
         return new PostsListResponseDto(postsDtoList);
     }
-
+    @Transactional
     public List<PostsDto> postsListToPostsDtoList(List<Posts> postsList){
         return postsList.stream()
                 .map(post -> PostsDto.builder()
@@ -140,14 +140,12 @@ public class PostsService {
                 )
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     public UserPostsListResponseDto userPostsList(String userEmail) {
         // find user with userEmail
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
         // create UserPostsListResponseDto
-
         return UserPostsListResponseDto.builder()
                 .userId(user.getId())
                 .userName(user.getName())
@@ -157,4 +155,8 @@ public class PostsService {
                         .collect(Collectors.toList()))
                 .build();
     }
+//    @Transactional
+//    public MyProfileResponseDto myProfile() {
+//
+//    }
 }

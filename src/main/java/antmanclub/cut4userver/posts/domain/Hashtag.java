@@ -19,7 +19,7 @@ public class Hashtag {
     @Column(length = 200, nullable = false)
     private String hashtag;
 
-    @OneToMany(mappedBy = "hashtag")
+    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.REMOVE)
     private List<PostsHashtag> postsHashtags = new ArrayList<>();
 
     @Builder

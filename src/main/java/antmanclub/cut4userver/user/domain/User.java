@@ -31,19 +31,19 @@ public class User {
 
     private String profileimg;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Posts> postsList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "follower")
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE)
     private List<Follow> following = new ArrayList<>();
 
-    @OneToMany(mappedBy = "followee")
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.REMOVE)
     private List<Follow> followers = new ArrayList<>();
 
     public void addFollowing(Follow follow){

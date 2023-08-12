@@ -1,5 +1,6 @@
 package antmanclub.cut4userver.posts.controller;
 
+import antmanclub.cut4userver.posts.dto.MyProfileResponseDto;
 import antmanclub.cut4userver.posts.dto.PostsAddRequestDto;
 import antmanclub.cut4userver.posts.dto.PostsListResponseDto;
 import antmanclub.cut4userver.posts.dto.UserPostsListResponseDto;
@@ -44,4 +45,8 @@ public class PostsController {
     public UserPostsListResponseDto userPostsList(@PathVariable(value = "userEmail") String userEmail){
         return postsService.userPostsList(userEmail);
     }
+//    @GetMapping("/myprofile")
+//    public MyProfileResponseDto myProfile(){
+//        return postsService.myProfile();
+//    }
 }
