@@ -122,7 +122,6 @@ public class PostsService {
         List<PostsDto> postsDtoList = postsListToPostsDtoList(postsList);    // postsList to postsDtoList
         return new PostsListResponseDto(postsDtoList);
     }
-    @Transactional
     public List<PostsDto> postsListToPostsDtoList(List<Posts> postsList){
         return postsList.stream()
                 .map(post -> PostsDto.builder()
@@ -132,6 +131,8 @@ public class PostsService {
                         .postsId(post.getId())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .createTime(post.getCreatedDate())
+                        .modifyTime(post.getModifiedDate())
                         .frameImg(post.getFrameImg())
                         .Hashtags(post.getPostsHashtags().stream().map(postsHashtag -> {
                             return postsHashtag.getHashtag().getHashtag();
@@ -184,6 +185,8 @@ public class PostsService {
                 .content(post.getContent())
                 .frameImg(post.getFrameImg())
                 .likeCount(post.getLikecount())
+                .createTime(post.getCreatedDate())
+                .modifyTime(post.getModifiedDate())
                 .Hashtags(post.getPostsHashtags().stream()
                         .map(ph -> ph.getHashtag().getHashtag())
                         .collect(Collectors.toList()))

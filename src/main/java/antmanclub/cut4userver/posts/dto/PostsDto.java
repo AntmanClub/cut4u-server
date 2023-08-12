@@ -18,5 +18,6 @@ public class PostsDto {
     private String frameImg;
     private int likeCount;
     private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
     private List<String> Hashtags;
 }
