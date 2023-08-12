@@ -27,12 +27,10 @@ public class UserController {
     public SuccessResponseDto join(@RequestBody JoinRequestDto requestDto){
         return userService.join(requestDto);
     }
-
     @GetMapping("/duplecheck/{email}")
     public SuccessResponseDto emailDupleCheck(@PathVariable String email){
         return userService.emailDupleCheck(email);
     }
-
     @PatchMapping(path="/editProfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserProfileUpdateResponseDto editProfile(@RequestParam(value="image") MultipartFile image,
                                                     @RequestParam(value="name") String name,
@@ -45,24 +43,24 @@ public class UserController {
                 .profileimg(imgSrc)
                 .build());
     }
-
     @PostMapping("/follow")
     public SuccessResponseDto userFollow(@RequestBody UserFollowRequestDto userFollowRequestDto){
         return userService.userFollow(userFollowRequestDto);
     }
-
     @DeleteMapping("/unfollow")
     public SuccessResponseDto userUnfollow(@RequestBody UserFollowRequestDto userFollowRequestDto){
         return userService.userUnfollow(userFollowRequestDto);
     }
-
     @GetMapping("/following/list/{userId}")
     public List<FollowingListResponseDto> followingList(@PathVariable Long userId){
         return userService.followingList(userId);
     }
-
     @GetMapping("/follower/list/{userId}")
     public List<FollowerListResponseDto> followerList(@PathVariable Long userId){
         return userService.followerList(userId);
+    }
+    @GetMapping("/search/{name}")
+    public List<UserListResponseDto> searchName(@PathVariable String name){
+        return userService.searchName(name);
     }
 }

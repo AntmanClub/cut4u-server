@@ -144,4 +144,17 @@ public class UserService {
                 .map(FollowerListResponseDto::new)
                 .collect(Collectors.toList());
     }
+
+    public List<UserListResponseDto> searchName(String name) {
+        List<User> users = userRepository.findByNameContaining(name);
+        //팔로워 순으로 내림차순 정렬
+        users.sort((u1, u2)-> u2.getFollowing().size() - u1.getFollowing().size());
+        return users.stream().map(user->{
+            UserListResponseDto dto = new UserListResponseDto();
+            dto.setEmail(user.getEmail());
+            dto.setName(user.getName());
+            dto.setProfileImg(user.getProfileimg());
+            return dto;
+        }).collect(Collectors.toList());
+    }
 }
