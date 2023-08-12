@@ -3,6 +3,7 @@ package antmanclub.cut4userver.posts.controller;
 import antmanclub.cut4userver.posts.dto.ProfileResponseDto;
 import antmanclub.cut4userver.posts.dto.PostsAddRequestDto;
 import antmanclub.cut4userver.posts.dto.PostsListResponseDto;
+import antmanclub.cut4userver.posts.dto.SearchPostsResponseDto;
 import antmanclub.cut4userver.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +47,9 @@ public class PostsController {
     @GetMapping("/myprofile")
     public ProfileResponseDto myProfile(){
         return postsService.myProfile();
+    }
+    @GetMapping("/search")
+    public List<SearchPostsResponseDto> searchTab(){
+        return postsService.searchTab();
     }
 }

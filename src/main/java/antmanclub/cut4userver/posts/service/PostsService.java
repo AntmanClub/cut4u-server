@@ -31,7 +31,7 @@ public class PostsService {
     private final PostsHashtagRepository postsHashtagRepository;
     private final CurrentUser currentUser;
     private final AwsUpload awsUpload;
-
+    @Transactional
     public PostsListResponseDto feed() {
         User user = userRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
@@ -129,6 +129,7 @@ public class PostsService {
                         .userName(post.getUser().getName())
                         .profileImg(post.getUser().getProfileimg())
                         .postsId(post.getId())
+                        .postImages(post.getImages())
                         .title(post.getTitle())
                         .content(post.getContent())
                         .createTime(post.getCreatedDate())
@@ -174,13 +175,13 @@ public class PostsService {
         profileResponseDto.setPostsDtoList(postsDtos);
         return profileResponseDto;
     }
-
     private PostsDto convertToDto(Posts post) {
         return PostsDto.builder()
                 .userId(post.getUser().getId())
                 .userName(post.getUser().getName())
                 .profileImg(post.getUser().getProfileimg())
                 .postsId(post.getId())
+                .postImages(post.getImages())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .frameImg(post.getFrameImg())
@@ -192,4 +193,19 @@ public class PostsService {
                         .collect(Collectors.toList()))
                 .build();
     }
+    @Transactional
+    public List<SearchPostsResponseDto> searchTab() {
+        List<Posts> postsList = postsRepository.findTop10ByOrderByLikecountDesc();
+        return postsList.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+    private SearchPostsResponseDto toDto(Posts post) {
+        return SearchPostsResponseDto.builder()
+                .id(post.getId())
+                .frameImg(post.getFrameImg())
+                .postImages(post.getImages())
+                .build();
+    }
+    
 }

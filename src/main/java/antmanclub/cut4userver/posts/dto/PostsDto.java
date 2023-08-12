@@ -20,4 +20,5 @@ public class PostsDto {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
     private List<String> Hashtags;
+    private List<String> postImages;
 }
