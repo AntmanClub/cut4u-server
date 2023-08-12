@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class MyProfileResponseDto {
+public class ProfileResponseDto {
     private String name;
     private String profileImg;
     private int postCount;

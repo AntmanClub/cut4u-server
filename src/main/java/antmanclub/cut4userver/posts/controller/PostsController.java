@@ -1,11 +1,9 @@
 package antmanclub.cut4userver.posts.controller;
 
-import antmanclub.cut4userver.posts.dto.MyProfileResponseDto;
+import antmanclub.cut4userver.posts.dto.ProfileResponseDto;
 import antmanclub.cut4userver.posts.dto.PostsAddRequestDto;
 import antmanclub.cut4userver.posts.dto.PostsListResponseDto;
-import antmanclub.cut4userver.posts.dto.UserPostsListResponseDto;
 import antmanclub.cut4userver.posts.service.PostsService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,11 +40,11 @@ public class PostsController {
     }
 
     @GetMapping("/{userEmail}")
-    public UserPostsListResponseDto userPostsList(@PathVariable(value = "userEmail") String userEmail){
+    public ProfileResponseDto userPostsList(@PathVariable(value = "userEmail") String userEmail){
         return postsService.userPostsList(userEmail);
     }
-//    @GetMapping("/myprofile")
-//    public MyProfileResponseDto myProfile(){
-//        return postsService.myProfile();
-//    }
+    @GetMapping("/myprofile")
+    public ProfileResponseDto myProfile(){
+        return postsService.myProfile();
+    }
 }

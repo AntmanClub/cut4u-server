@@ -3,6 +3,7 @@ package antmanclub.cut4userver.posts.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -15,5 +16,7 @@ public class PostsDto {
     private String title;
     private String content;
     private String frameImg;
+    private int likeCount;
+    private LocalDateTime createTime;
     private List<String> Hashtags;
 }

@@ -141,22 +141,52 @@ public class PostsService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public UserPostsListResponseDto userPostsList(String userEmail) {
+    public ProfileResponseDto userPostsList(String userEmail) {
         // find user with userEmail
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-        // create UserPostsListResponseDto
-        return UserPostsListResponseDto.builder()
-                .userId(user.getId())
-                .userName(user.getName())
-                .profileImg(user.getProfileimg())
-                .userPostsDtoList(user.getPostsList().stream()
-                        .map(UserPostsDto::new)
+        ProfileResponseDto profileResponseDto = new ProfileResponseDto();
+        profileResponseDto.setName(user.getName());
+        profileResponseDto.setProfileImg(user.getProfileimg());
+        profileResponseDto.setPostCount(user.getPostsList().size());
+        profileResponseDto.setFollowerCount(user.getFollowing().size());
+        profileResponseDto.setFollowingCount(user.getFollowers().size());
+        List<PostsDto> postsDtos = user.getPostsList().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        profileResponseDto.setPostsDtoList(postsDtos);
+        return profileResponseDto;
+    }
+    @Transactional
+    public ProfileResponseDto myProfile() {
+        User user = userRepository.findByEmail(currentUser.getEmail())
+                .orElseThrow(()->new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+        ProfileResponseDto profileResponseDto = new ProfileResponseDto();
+        profileResponseDto.setName(user.getName());
+        profileResponseDto.setProfileImg(user.getProfileimg());
+        profileResponseDto.setPostCount(user.getPostsList().size());
+        profileResponseDto.setFollowerCount(user.getFollowing().size());
+        profileResponseDto.setFollowingCount(user.getFollowers().size());
+        List<PostsDto> postsDtos = user.getPostsList().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        profileResponseDto.setPostsDtoList(postsDtos);
+        return profileResponseDto;
+    }
+
+    private PostsDto convertToDto(Posts post) {
+        return PostsDto.builder()
+                .userId(post.getUser().getId())
+                .userName(post.getUser().getName())
+                .profileImg(post.getUser().getProfileimg())
+                .postsId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .frameImg(post.getFrameImg())
+                .likeCount(post.getLikecount())
+                .Hashtags(post.getPostsHashtags().stream()
+                        .map(ph -> ph.getHashtag().getHashtag())
                         .collect(Collectors.toList()))
                 .build();
     }
-//    @Transactional
-//    public MyProfileResponseDto myProfile() {
-//
-//    }
 }
