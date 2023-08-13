@@ -1,9 +1,7 @@
 package antmanclub.cut4userver.comment.service;
 
 import antmanclub.cut4userver.comment.domain.Comment;
-import antmanclub.cut4userver.comment.dto.CommentsAddRequestDto;
-import antmanclub.cut4userver.comment.dto.CommentsDto;
-import antmanclub.cut4userver.comment.dto.CommentsListResponseDto;
+import antmanclub.cut4userver.comment.dto.*;
 import antmanclub.cut4userver.comment.repository.CommentRepository;
 import antmanclub.cut4userver.posts.domain.Posts;
 import antmanclub.cut4userver.posts.repository.PostsRepository;
@@ -79,5 +77,25 @@ public class CommentService {
                                 .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CommentsListResponseDto deleteComment(Long commentId) {
+        // get comment by id
+        Comment deleteComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("이미 삭제되었거나 존재하지 않는 댓글입니다."));
+
+        // find post by comment
+        Posts targetPosts = null;
+        if(deleteComment.getParentComment() == null){   // has no parent
+            targetPosts = deleteComment.getPost();
+        }else{
+            targetPosts = deleteComment.getParentComment().getPost();
+        }
+
+        // delete comment
+        commentRepository.delete(deleteComment);
+
+        return viewComments(targetPosts.getId());
     }
 }
