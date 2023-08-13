@@ -56,6 +56,7 @@ public class LikesService {
         Likes likes = likesRepository.findByPostAndUser(posts, user)
                 .orElseThrow(()->new IllegalArgumentException(user.getName()+"는 해당 게시물에 좋아요를 누르지 않았습니다."));
         likesRepository.delete(likes);
+        posts.subLikeCount();
         return SuccessResponseDto.builder().success(true).build();
     }
     @Transactional

@@ -73,4 +73,7 @@ public class Posts extends BaseTimeEntity{
     public void addLike(Likes likes){
         this.likes.add(likes);
     }
+    public void subLikeCount(){
+        this.likecount --;
+    }
 }

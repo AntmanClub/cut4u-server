@@ -33,7 +33,7 @@ public class Comment {
     private User user;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String comment;
+    private String content;
 
     @Builder
     public Comment(Comment parentComment, Posts posts, User user){
@@ -43,7 +43,7 @@ public class Comment {
     }
 
     //답글 추가될 때 리스트에 add
-    public void addReplyComments(Comment replyComment) {
+    public void addReplyComment(Comment replyComment) {
         this.replyComments.add(replyComment);
     }
 }

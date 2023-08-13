@@ -9,11 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/comment")
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
-
     @PostMapping("/add")
     public CommentsListResponseDto addComments(@RequestBody CommentsAddRequestDto commentsAddRequestDto){
         return commentService.addComment(commentsAddRequestDto);
