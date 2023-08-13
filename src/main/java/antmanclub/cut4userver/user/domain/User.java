@@ -55,4 +55,7 @@ public class User {
     }
 
     public void addPosts(Posts posts){ postsList.add(posts); }
+    public void addLikes(Likes likes){
+        this.likes.add(likes);
+    }
 }

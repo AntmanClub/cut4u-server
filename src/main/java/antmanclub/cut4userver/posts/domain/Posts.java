@@ -56,7 +56,7 @@ public class Posts extends BaseTimeEntity{
         this.frameImg = frameImg;
     }
 
-    public void addCount(){
+    public void addLikeCount(){
         this.likecount += 1;
     }
     public void setUser(User user) {
@@ -69,5 +69,8 @@ public class Posts extends BaseTimeEntity{
 
     public void addComment(Comment comment){
         this.comments.add(comment);
+    }
+    public void addLike(Likes likes){
+        this.likes.add(likes);
     }
 }
