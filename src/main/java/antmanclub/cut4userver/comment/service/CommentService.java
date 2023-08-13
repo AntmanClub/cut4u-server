@@ -49,6 +49,7 @@ public class CommentService {
             newComment = new Comment(parentComment, null, owner, content);
             commentRepository.save(newComment);
         }
+        targetPosts.addCommentsCount();
         return viewComments(commentsAddRequestDto.getPostsId());
     }
 
@@ -109,6 +110,35 @@ public class CommentService {
         // delete comment
         commentRepository.delete(deleteComment);
         entityManager.flush();  // 트랜잭션 지연을 일단 임시 해결하기 위함 근데 관행적으로 안 좋대서 바꿔야 하는데 뭘로 바꾸지
+
+        targetPosts.subCommentsCount();
+        return viewComments(targetPosts.getId());
+    }
+
+    @Transactional
+    public CommentsListResponseDto modifyComment(CommentsModifyRequestDto commentsModifyRequestDto) {
+        // get comment by id
+        Comment modifyComment = commentRepository.findById(commentsModifyRequestDto.getCommentId())
+                .orElseThrow(() -> new IllegalArgumentException("수정하고자 하는 댓글이 이미 삭제되었거나 존재하지 않습니다."));
+
+        // authorization
+        User user = userRepository.findByEmail(currentUser.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+        if(!user.equals(modifyComment.getUser())){
+            throw new IllegalArgumentException("삭제에 대한 권한이 없습니다.");
+        }
+
+        // find post by comment
+        Posts targetPosts = null;
+        if(modifyComment.getParentComment() == null){   // has no parent
+            targetPosts = modifyComment.getPost();
+        }else{
+            targetPosts = modifyComment.getParentComment().getPost();   // has parent
+        }
+
+        // update comment
+        modifyComment.setContent(commentsModifyRequestDto.getContent());
+        entityManager.flush();
 
         return viewComments(targetPosts.getId());
     }

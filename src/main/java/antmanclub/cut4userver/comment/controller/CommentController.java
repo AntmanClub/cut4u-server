@@ -2,6 +2,7 @@ package antmanclub.cut4userver.comment.controller;
 
 import antmanclub.cut4userver.comment.dto.CommentsAddRequestDto;
 import antmanclub.cut4userver.comment.dto.CommentsListResponseDto;
+import antmanclub.cut4userver.comment.dto.CommentsModifyRequestDto;
 import antmanclub.cut4userver.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,5 +25,10 @@ public class CommentController {
     @DeleteMapping("/delete/{commentId}")
     public CommentsListResponseDto deleteComments(@PathVariable(value = "commentId") Long commentId){
         return commentService.deleteComment(commentId);
+    }
+
+    @PatchMapping("/modify")
+    public CommentsListResponseDto modifyComments(@RequestBody CommentsModifyRequestDto commentsModifyRequestDto){
+        return commentService.modifyComment(commentsModifyRequestDto);
     }
 }

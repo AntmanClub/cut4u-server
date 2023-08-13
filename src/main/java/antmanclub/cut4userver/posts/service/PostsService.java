@@ -135,6 +135,8 @@ public class PostsService {
                         .createTime(post.getCreatedDate())
                         .modifyTime(post.getModifiedDate())
                         .frameImg(post.getFrameImg())
+                        .likeCount(post.getLikecount())
+                        .commentsCount(post.getCommentsCount())
                         .Hashtags(post.getPostsHashtags().stream().map(postsHashtag -> {
                             return postsHashtag.getHashtag().getHashtag();
                         }).collect(Collectors.toList()))
