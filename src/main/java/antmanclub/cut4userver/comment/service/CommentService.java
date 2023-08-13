@@ -45,7 +45,6 @@ public class CommentService {
             Comment parentComment = commentRepository.findById(commentsAddRequestDto.getParentCommentId())
                     .orElseThrow(() -> new IllegalArgumentException("삭제된 댓글이거나 존재하지 않는 댓글에는 답글을 달 수 없습니다."));
             newComment = new Comment(parentComment, null, owner, content);
-            parentComment.addReplyComment(newComment);
             commentRepository.save(newComment);
         }
         return viewComments(commentsAddRequestDto.getPostsId());
