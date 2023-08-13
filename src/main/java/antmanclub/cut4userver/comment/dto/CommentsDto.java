@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @Builder
 public class CommentsDto {
+    private Long commentId;
     private String userEmail;
     private String userName;
     private String profileImg;

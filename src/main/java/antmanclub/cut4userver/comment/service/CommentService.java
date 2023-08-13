@@ -8,6 +8,8 @@ import antmanclub.cut4userver.posts.repository.PostsRepository;
 import antmanclub.cut4userver.user.SemiToken.CurrentUser;
 import antmanclub.cut4userver.user.domain.User;
 import antmanclub.cut4userver.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class CommentService {
     private final PostsRepository postsRepository;
     private final UserRepository userRepository;
     private final CurrentUser currentUser;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public CommentsListResponseDto addComment(CommentsAddRequestDto commentsAddRequestDto) {
@@ -62,12 +66,14 @@ public class CommentService {
     private List<CommentsDto> convertToDtoList(List<Comment> commentsList) {
         return commentsList.stream()
                 .map(comment -> CommentsDto.builder()
+                        .commentId(comment.getId())
                         .comment(comment.getContent())
                         .userName(comment.getUser().getName())
                         .userEmail(comment.getUser().getEmail())
                         .profileImg(comment.getUser().getProfileimg())
                         .child(comment.getReplyComments().stream()
                                 .map(replyComment -> CommentsDto.builder()
+                                        .commentId(replyComment.getId())
                                         .comment(replyComment.getContent())
                                         .userName(replyComment.getUser().getName())
                                         .userEmail(replyComment.getUser().getEmail())
@@ -85,16 +91,24 @@ public class CommentService {
         Comment deleteComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("이미 삭제되었거나 존재하지 않는 댓글입니다."));
 
+        // authorization
+        User user = userRepository.findByEmail(currentUser.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+        if(!user.equals(deleteComment.getUser())){
+            throw new IllegalArgumentException("삭제에 대한 권한이 없습니다.");
+        }
+
         // find post by comment
         Posts targetPosts = null;
         if(deleteComment.getParentComment() == null){   // has no parent
             targetPosts = deleteComment.getPost();
         }else{
-            targetPosts = deleteComment.getParentComment().getPost();
+            targetPosts = deleteComment.getParentComment().getPost();   // has parent
         }
 
         // delete comment
         commentRepository.delete(deleteComment);
+        entityManager.flush();  // 트랜잭션 지연을 일단 임시 해결하기 위함 근데 관행적으로 안 좋대서 바꿔야 하는데 뭘로 바꾸지
 
         return viewComments(targetPosts.getId());
     }
