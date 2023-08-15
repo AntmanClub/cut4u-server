@@ -8,9 +8,15 @@ import lombok.Getter;
 public enum ErrorCode
 {
     // User
-    MEMBER_NOT_FOUND(400, "M001", "존재 하지 않는 유저입니다."),
-    USERNAME_ALREADY_EXIST(400, "M002", "이미 존재하는 사용자 이름입니다."),
-    ACCOUNT_MISMATCH(401, "M005", "계정 정보가 일치하지 않습니다."),
+    USER_NOT_FOUND(400, "U001", "유저가 존재하지 않습니다."),
+    NOT_CORRECT_PASSWORD(400, "U002", "비밀번호가 틀렸습니다."),
+    ALREADY_EXIST_NAME(400, "M005", "이미 있는 이름입니다."),
+    ALREADY_EXIST_EMAIL(400, "M005", "이미 있는 이메일입니다."),
+    NOT_EQUAL_PASSWORD(400, "M005", "비밀번호가 일치하지 않습니다."),
+    CAN_NOT_FOLLOW_MYSELF(400, "M005", "자기 자신은 팔로우할 수 없습니다."),
+    ALREADY_FOLLOW_USER(400, "M005", "이미 팔로우한 유저입니다."),
+    CAN_NOT_UNFOLLOW_MYSELF(400, "M005", "자기 자신은 언팔로우할 수 없습니다."),
+    NOT_FOLLOW_USER(400, "M005", "팔로우하지 않은 유저입니다."),
 
     // Posts
     DAILYPLAN_ALREADY_EXIST(400, "D001", "이미 데일리 플랜을 작성하였습니다. PUT으로 update 해주세요"),

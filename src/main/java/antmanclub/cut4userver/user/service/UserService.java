@@ -3,6 +3,8 @@ package antmanclub.cut4userver.user.service;
 import antmanclub.cut4userver.config.SecurityConfig;
 import antmanclub.cut4userver.follow.domain.Follow;
 import antmanclub.cut4userver.follow.repository.FollowRepository;
+import antmanclub.cut4userver.global.error.ErrorCode;
+import antmanclub.cut4userver.global.error.exception.EntityNotFoundException;
 import antmanclub.cut4userver.user.SemiToken.CurrentUser;
 import antmanclub.cut4userver.user.domain.User;
 import antmanclub.cut4userver.user.dto.*;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -27,12 +30,14 @@ public class UserService {
     public String login(LoginRequestDto loginRequestDto) {
         userRepository.findByEmail(loginRequestDto.getEmail()).ifPresent(m -> {
             if(!securityConfig.getPasswordEncoder().matches(loginRequestDto.getPassword(), m.getPassword())){
-                throw new IllegalStateException("비밀번호가 틀렸습니다");
+                throw new EntityNotFoundException(ErrorCode.NOT_CORRECT_PASSWORD,
+                        "비밀번호가 틀렸습니다 password: "+ loginRequestDto.getPassword());
             }
         });
         //비밀번호가 맞으면 해당 이메일은 고유하므로 로그인 성공
         User user = userRepository.findByEmail(loginRequestDto.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("해당 유저가 없습니다"));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "이메일에 해당하는 유저가 없습니다. Email : "+ loginRequestDto.getEmail()));
         currentUser.setName(user.getName());
         currentUser.setEmail(user.getEmail());
         return user.getName();
@@ -41,13 +46,16 @@ public class UserService {
     @Transactional
     public String join(JoinRequestDto requestDto) {
         userRepository.findByName(requestDto.getName()).ifPresent(m -> {
-            throw new IllegalStateException("이미 존재하는 이름입니다.");
+            throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_NAME,
+                    "이미 존재하는 이름 name: "+requestDto.getName());
         });
         userRepository.findByEmail(requestDto.getEmail()).ifPresent(m -> {
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
+            throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_EMAIL,
+                    "이미 존재하는 이메일 email: "+requestDto.getEmail());
         });
         if (!Objects.equals(requestDto.getPassword(), requestDto.getConfirmPassword())) {
-            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+            throw new EntityNotFoundException(ErrorCode.NOT_EQUAL_PASSWORD,
+                    "비밀번호: "+requestDto.getPassword()+" 비밀번호 확인: "+requestDto.getConfirmPassword());
         }
         System.out.println(requestDto.getPassword());
         String encodePw = securityConfig.getPasswordEncoder().encode(requestDto.getPassword());
@@ -63,7 +71,8 @@ public class UserService {
     @Transactional
     public String emailDupleCheck(String email) {
         userRepository.findByEmail(email).ifPresent(m -> {
-            throw new IllegalArgumentException("중복된 이메일이 있습니다.");
+            throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_EMAIL,
+                    "이미 존재하는 이메일 email:" +email);
         });
         return email;
     }
@@ -72,10 +81,12 @@ public class UserService {
     public UserProfileUpdateResponseDto editProfile(UserProfileUpdateRequestDto userProfileUpdateRequestDto) {
         userRepository.findByName(userProfileUpdateRequestDto.getName())
                 .ifPresent(m -> {
-                    throw new IllegalArgumentException("이미 있는 이름입니다.");
+                    throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_NAME,
+                            "이미 존재하는 이름 name: "+userProfileUpdateRequestDto.getName());
                 });
         User user = userRepository.findByEmail(userProfileUpdateRequestDto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("해당 이에일을 가진 유저가 없습니다"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 이에일을 가진 유저가 없습니다 email: "+userProfileUpdateRequestDto.getEmail()));
         user.setName(userProfileUpdateRequestDto.getName());
         user.setProfileimg(userProfileUpdateRequestDto.getProfileimg());
         return UserProfileUpdateResponseDto.builder()
@@ -87,18 +98,22 @@ public class UserService {
     @Transactional
     public String userFollow(UserFollowRequestDto userFollowRequestDto) {
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "접속중인 유저가 존재하지 않습니다."));
         User followingUser = userRepository.findById(userFollowRequestDto.getId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 id의 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 id의 유저가 존재하지 않습니다. id"+userFollowRequestDto.getId()));
         if (user.getId().equals(followingUser.getId())) {
-            throw new IllegalStateException("같은 유저는 팔로우할 수 없습니다.");
+            throw new EntityNotFoundException(ErrorCode.CAN_NOT_FOLLOW_MYSELF,
+                    "접속한 유저 이름: "+user.getName()+"팔로우하려는 유저 이름: "+followingUser.getName());
         }
         Follow follow = new Follow();
         follow.setFollowee(user);
         follow.setFollower(followingUser);
         followRepository.findByFolloweeAndFollower(user, followingUser)
                 .ifPresent(m -> {
-                    throw new IllegalArgumentException("이미 팔로우한 사용자 입니다.");
+                    throw new EntityNotFoundException(ErrorCode.ALREADY_FOLLOW_USER,
+                            "이미 팔로우한 유저 이름: "+followingUser.getName());
                 });
         followRepository.save(follow);
         user.addFollowing(follow);
@@ -110,22 +125,27 @@ public class UserService {
     @Transactional
     public String userUnfollow(UserFollowRequestDto userFollowRequestDto) {
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "접속중인 유저가 존재하지 않습니다."));
         User followingUser = userRepository.findById(userFollowRequestDto.getId())
-                .orElseThrow(()-> new IllegalArgumentException("해당 id의 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 id의 유저가 존재하지 않습니다. id: "+userFollowRequestDto.getId()));
         if (user.getId().equals(followingUser.getId())) {
-            throw new IllegalStateException("같은 유저는 언팔할 수 없습니다.");
+            throw new EntityNotFoundException(ErrorCode.CAN_NOT_UNFOLLOW_MYSELF,
+                    "접속한 유저 이름: "+user.getName()+"언팔로우하려는 유저 이름: "+followingUser.getName());
         }
         Follow follow = new Follow();
         follow = followRepository.findByFolloweeAndFollower(user, followingUser)
-                .orElseThrow(()-> new IllegalArgumentException("팔로우 하지 않은 사용자입니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.NOT_FOLLOW_USER,
+                        "팔로우 하려는 유저 이름: "+followingUser.getName()));
         followRepository.delete(follow);
         return followingUser.getName();
     }
     @Transactional
     public List<FollowingListResponseDto> followingList(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new IllegalArgumentException("해당하는 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 id의 유저가 존재하지 않습니다. id: "+userId));
         List<User> followerUsers = user.getFollowers().stream()
                 .map(Follow::getFollower)
                 .toList();
@@ -136,7 +156,8 @@ public class UserService {
     @Transactional
     public List<FollowerListResponseDto> followerList(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new IllegalArgumentException("해당하는 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 id의 유저가 존재하지 않습니다. id: "+userId));
         List<User> followingUsers = user.getFollowing().stream()
                 .map(Follow::getFollowee)
                 .toList();
@@ -160,7 +181,8 @@ public class UserService {
     @Transactional
     public UserListResponseDto searchHardName(String name) {
         User user = userRepository.findByName(name)
-                .orElseThrow(()-> new IllegalArgumentException("이름에 해당하는 유저가 없습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 이름의 유저가 없습니다. name: "+name));
         UserListResponseDto userListResponseDto = new UserListResponseDto();
         userListResponseDto.setName(user.getName());
         userListResponseDto.setEmail(user.getEmail());
