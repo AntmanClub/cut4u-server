@@ -1,9 +1,6 @@
 package antmanclub.cut4userver.posts.controller;
 
-import antmanclub.cut4userver.posts.dto.ProfileResponseDto;
-import antmanclub.cut4userver.posts.dto.PostsAddRequestDto;
-import antmanclub.cut4userver.posts.dto.PostsListResponseDto;
-import antmanclub.cut4userver.posts.dto.SearchPostsResponseDto;
+import antmanclub.cut4userver.posts.dto.*;
 import antmanclub.cut4userver.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +48,9 @@ public class PostsController {
     @GetMapping("/search")
     public List<SearchPostsResponseDto> searchTab(){
         return postsService.searchTab();
+    }
+    @GetMapping("/search/{postId}")
+    public PostsDto postClick(@PathVariable Long postId){
+        return postsService.postClick(postId);
     }
 }

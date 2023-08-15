@@ -207,5 +207,10 @@ public class PostsService {
                 .postImages(post.getImages())
                 .build();
     }
-    
+    @Transactional
+    public PostsDto postClick(Long postId) {
+        Posts posts = postsRepository.findById(postId)
+                .orElseThrow(()-> new IllegalArgumentException("해당하는 게시물이 없습니다."));
+        return convertToDto(posts);
+    }
 }
