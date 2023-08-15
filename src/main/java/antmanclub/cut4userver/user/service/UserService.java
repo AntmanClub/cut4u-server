@@ -39,7 +39,7 @@ public class UserService {
     }
 
     @Transactional
-    public SuccessResponseDto join(JoinRequestDto requestDto) {
+    public String join(JoinRequestDto requestDto) {
         userRepository.findByName(requestDto.getName()).ifPresent(m -> {
             throw new IllegalStateException("이미 존재하는 이름입니다.");
         });
@@ -57,15 +57,15 @@ public class UserService {
         user.setName(requestDto.getName());
         user.setProfileimg(""); //나중에 기본 이미지로 바꿔줘야함
         userRepository.save(user);
-        return SuccessResponseDto.builder().success(true).build();
+        return user.getName();
     }
 
     @Transactional
-    public SuccessResponseDto emailDupleCheck(String email) {
+    public String emailDupleCheck(String email) {
         userRepository.findByEmail(email).ifPresent(m -> {
             throw new IllegalArgumentException("중복된 이메일이 있습니다.");
         });
-        return SuccessResponseDto.builder().success(true).build();
+        return email;
     }
 
     @Transactional
@@ -85,11 +85,11 @@ public class UserService {
     }
 
     @Transactional
-    public SuccessResponseDto userFollow(UserFollowRequestDto userFollowRequestDto) {
+    public String userFollow(UserFollowRequestDto userFollowRequestDto) {
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
         User followingUser = userRepository.findById(userFollowRequestDto.getId())
-                .orElseThrow(()-> new IllegalArgumentException("해당 id의 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 id의 유저가 존재하지 않습니다."));
         if (user.getId().equals(followingUser.getId())) {
             throw new IllegalStateException("같은 유저는 팔로우할 수 없습니다.");
         }
@@ -105,10 +105,10 @@ public class UserService {
         user.addFollower(follow);
         followingUser.addFollower(follow);
         followingUser.addFollowing(follow);
-        return SuccessResponseDto.builder().success(true).build();
+        return followingUser.getName();
     }
     @Transactional
-    public SuccessResponseDto userUnfollow(UserFollowRequestDto userFollowRequestDto) {
+    public String userUnfollow(UserFollowRequestDto userFollowRequestDto) {
         User user = userRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(()-> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
         User followingUser = userRepository.findById(userFollowRequestDto.getId())
@@ -120,7 +120,7 @@ public class UserService {
         follow = followRepository.findByFolloweeAndFollower(user, followingUser)
                 .orElseThrow(()-> new IllegalArgumentException("팔로우 하지 않은 사용자입니다."));
         followRepository.delete(follow);
-        return SuccessResponseDto.builder().success(true).build();
+        return followingUser.getName();
     }
     @Transactional
     public List<FollowingListResponseDto> followingList(Long userId) {
@@ -156,5 +156,15 @@ public class UserService {
             dto.setProfileImg(user.getProfileimg());
             return dto;
         }).collect(Collectors.toList());
+    }
+    @Transactional
+    public UserListResponseDto searchHardName(String name) {
+        User user = userRepository.findByName(name)
+                .orElseThrow(()-> new IllegalArgumentException("이름에 해당하는 유저가 없습니다."));
+        UserListResponseDto userListResponseDto = new UserListResponseDto();
+        userListResponseDto.setName(user.getName());
+        userListResponseDto.setEmail(user.getEmail());
+        userListResponseDto.setProfileImg(user.getProfileimg());
+        return userListResponseDto;
     }
 }
