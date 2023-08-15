@@ -24,7 +24,10 @@ public enum ErrorCode
     POSTS_CAN_NOT_DELETE(400, "P003", "게시물을 삭제할 수 없습니다."),
 
     // Comment
-    TODOLIST_NOT_FOUND(400, "T001", "존재 하지 않는 투두리스트입니다"),
+    CAN_NOT_REPLY_COMMENT(400, "C001", "답글을 등록할 수 없습니다."),
+    COMMENT_NOT_FOUND(400, "C002", "댓글(답글)이 존재하지 않습니다."),
+    CAN_NOT_DELETE_COMMENT(400, "C003", "댓글(답글)을 삭제할 수 없습니다."),
+    CAN_NOT_MODIFY_COMMENT(400, "C004", "댓글(답글)을 수정할 수 없습니다."),
 
     // Likes
     CAN_NOT_LIKE_POSTS(400, "L001", "좋아요를 누를 수 없습니다."),
