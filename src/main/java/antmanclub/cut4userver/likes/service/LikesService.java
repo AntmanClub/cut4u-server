@@ -28,7 +28,7 @@ public class LikesService {
     private final UserRepository userRepository;
     private final CurrentUser currentUser;
     @Transactional
-    public SuccessResponseDto addLike(Long postId) {
+    public boolean addLike(Long postId) {
         Posts posts = postsRepository.findById(postId)
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
                         "해당 id의 게시물이 없습니다. id: "+postId));
@@ -50,10 +50,10 @@ public class LikesService {
             posts.addLikeCount();
             user.addLikes(like);
         }
-        return SuccessResponseDto.builder().success(true).build();
+        return true;
     }
     @Transactional
-    public SuccessResponseDto deleteLike(Long postId) {
+    public boolean deleteLike(Long postId) {
         User user = userRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
                         "현재 접속중인 유저가 없습니다."));
@@ -65,7 +65,7 @@ public class LikesService {
                         user.getName()+"는 해당 게시물에 좋아요를 누르지 않았습니다."));
         likesRepository.delete(likes);
         posts.subLikeCount();
-        return SuccessResponseDto.builder().success(true).build();
+        return true;
     }
     @Transactional
     public List<UserListResponseDto> userList(Long postsId) {

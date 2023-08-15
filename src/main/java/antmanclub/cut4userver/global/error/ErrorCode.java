@@ -27,8 +27,8 @@ public enum ErrorCode
     TODOLIST_NOT_FOUND(400, "T001", "존재 하지 않는 투두리스트입니다"),
 
     // Likes
-    CAN_NOT_LIKE_POSTS(400, "C001", "좋아요를 누를 수 없습니다."),
-    CAN_NOT_UNLIKE_POSTS(400, "C001", "좋아요를 취소할 수 없습니다.")
+    CAN_NOT_LIKE_POSTS(400, "L001", "좋아요를 누를 수 없습니다."),
+    CAN_NOT_UNLIKE_POSTS(400, "L002", "좋아요를 취소할 수 없습니다.")
     ;
 
     private final int status;
