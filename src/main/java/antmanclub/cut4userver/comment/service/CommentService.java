@@ -3,6 +3,8 @@ package antmanclub.cut4userver.comment.service;
 import antmanclub.cut4userver.comment.domain.Comment;
 import antmanclub.cut4userver.comment.dto.*;
 import antmanclub.cut4userver.comment.repository.CommentRepository;
+import antmanclub.cut4userver.global.error.ErrorCode;
+import antmanclub.cut4userver.global.error.exception.EntityNotFoundException;
 import antmanclub.cut4userver.posts.domain.Posts;
 import antmanclub.cut4userver.posts.repository.PostsRepository;
 import antmanclub.cut4userver.user.SemiToken.CurrentUser;
@@ -13,6 +15,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.EscapedErrors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +35,12 @@ public class CommentService {
     public CommentsListResponseDto addComment(CommentsAddRequestDto commentsAddRequestDto) {
         // comment 연관관계 mapping
         Posts targetPosts = postsRepository.findById(commentsAddRequestDto.getPostsId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 없습니다. id: "+commentsAddRequestDto.getPostsId()));
 
         User owner = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("접속중인 유저가 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "접속중인 유저가 없습니다."));
         Comment newComment = null;
         String content = commentsAddRequestDto.getComment();
         if(commentsAddRequestDto.getParentCommentId() == 0L){
@@ -45,7 +50,8 @@ public class CommentService {
         }else{
             // comment has parent
             Comment parentComment = commentRepository.findById(commentsAddRequestDto.getParentCommentId())
-                    .orElseThrow(() -> new IllegalArgumentException("삭제된 댓글이거나 존재하지 않는 댓글에는 답글을 달 수 없습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CAN_NOT_REPLY_COMMENT,
+                            "해당 id의 댓글이 존재하지 않습니다. id: "+commentsAddRequestDto.getParentCommentId()));
             newComment = new Comment(parentComment, null, owner, content);
             commentRepository.save(newComment);
         }
@@ -57,7 +63,8 @@ public class CommentService {
     public CommentsListResponseDto viewComments(Long postsId) {
         // find comments list by posts id
         Posts targetPosts = postsRepository.findById(postsId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제되었거나 존재하지 않는 게시물입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 존재하지 않습니다. id: "+postsId));
         List<Comment> commentsList = targetPosts.getComments();
         List<CommentsDto> commentsDtoList = convertToDtoList(commentsList);
 
@@ -92,13 +99,16 @@ public class CommentService {
     public CommentsListResponseDto deleteComment(Long commentId) {
         // get comment by id
         Comment deleteComment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("이미 삭제되었거나 존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND,
+                        "해당 id의 댓글(답글)이 존재하지 않습니다. id: "+commentId));
 
         // authorization
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "현재 접속중인 유저가 없습니다."));
         if(!user.equals(deleteComment.getUser())){
-            throw new IllegalArgumentException("삭제에 대한 권한이 없습니다.");
+            throw new EntityNotFoundException(ErrorCode.CAN_NOT_DELETE_COMMENT,
+                    "댓글(답글)의 작성자가 아닙니다. 댓글(답글) 작성자: "+deleteComment.getUser().getName());
         }
 
         // find post by comment
@@ -121,13 +131,16 @@ public class CommentService {
     public CommentsListResponseDto modifyComment(CommentsModifyRequestDto commentsModifyRequestDto) {
         // get comment by id
         Comment modifyComment = commentRepository.findById(commentsModifyRequestDto.getCommentId())
-                .orElseThrow(() -> new IllegalArgumentException("수정하고자 하는 댓글이 이미 삭제되었거나 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND,
+                        "해당 id의 댓글(답글)이 존재하지 않습니다. id: "+commentsModifyRequestDto.getCommentId()));
 
         // authorization
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "현재 접속중인 유저가 없습니다."));
         if(!user.equals(modifyComment.getUser())){
-            throw new IllegalArgumentException("삭제에 대한 권한이 없습니다.");
+            throw new EntityNotFoundException(ErrorCode.CAN_NOT_MODIFY_COMMENT,
+                    "댓글(답글)의 작성자만이 수정할 수 있습니다. 댓글(답글) 작성자: "+modifyComment.getUser().getName());
         }
 
         // find post by comment

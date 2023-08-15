@@ -1,6 +1,8 @@
 package antmanclub.cut4userver.posts.service;
 
 import antmanclub.cut4userver.aws.AwsUpload;
+import antmanclub.cut4userver.global.error.ErrorCode;
+import antmanclub.cut4userver.global.error.exception.EntityNotFoundException;
 import antmanclub.cut4userver.posts.domain.Hashtag;
 import antmanclub.cut4userver.posts.domain.Posts;
 import antmanclub.cut4userver.posts.domain.PostsHashtag;
@@ -34,7 +36,8 @@ public class PostsService {
     @Transactional
     public PostsListResponseDto feed() {
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "접속중인 유저가 존재하지 않습니다."));
 
         // get postslist by user's following users
         List<Posts> postsList = new ArrayList<>();
@@ -52,7 +55,8 @@ public class PostsService {
     public PostsListResponseDto add(List<MultipartFile> images, PostsAddRequestDto postsAddRequestDto) {
         // uploads images into aws and get urls
         if(images.size() != 4){
-            throw new IllegalArgumentException("사진의 개수가 4개가 아닙니다.");
+            throw new EntityNotFoundException(ErrorCode.POSTS_PIC_NOT_FOUR,
+                    "올리려 하는 사진 개수: "+images.size());
         }
         List<String> imageUrls = images.stream()
                 .map(image -> {
@@ -66,7 +70,8 @@ public class PostsService {
 
         // user entity genarate
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));;
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "접속중인 유저가 존재하지 않습니다."));;
 
         // posts entity genarate
         Posts posts = new Posts();
@@ -106,13 +111,16 @@ public class PostsService {
     public PostsListResponseDto delete(Long postsId) {
         // delete posts in posts repository
         Posts deletePosts = postsRepository.findById(postsId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 존재하지 않습니다. id: "+postsId));
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("접속중인 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "접속중인 유저가 존재하지 않습니다."));
         if(deletePosts.getUser().equals(user)){
             postsRepository.delete(deletePosts);
         }else{
-            throw new IllegalArgumentException("포스트에 대한 삭제 권한이 없습니다.");
+            throw new EntityNotFoundException(ErrorCode.POSTS_CAN_NOT_DELETE,
+                    "접속중 유저 이름: "+user.getName()+"삭제하려는 게시물 게시 유저 이름: "+deletePosts.getUser().getName());
         }
         // get postslist by user's following users
         List<Posts> postsList = new ArrayList<>();
@@ -132,6 +140,8 @@ public class PostsService {
                         .postImages(post.getImages())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .likeCount(post.getLikecount())
+                        .commentCount(post.getCommentCount())
                         .createTime(post.getCreatedDate())
                         .modifyTime(post.getModifiedDate())
                         .frameImg(post.getFrameImg())
@@ -146,7 +156,8 @@ public class PostsService {
     public ProfileResponseDto userPostsList(String userEmail) {
         // find user with userEmail
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "해당 email의 유저가 업습니다. email: "+userEmail));
         ProfileResponseDto profileResponseDto = new ProfileResponseDto();
         profileResponseDto.setName(user.getName());
         profileResponseDto.setProfileImg(user.getProfileimg());
@@ -162,7 +173,8 @@ public class PostsService {
     @Transactional
     public ProfileResponseDto myProfile() {
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()->new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+                .orElseThrow(()->new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "현재 접속중인 유저가 없습니다."));
         ProfileResponseDto profileResponseDto = new ProfileResponseDto();
         profileResponseDto.setName(user.getName());
         profileResponseDto.setProfileImg(user.getProfileimg());
@@ -186,6 +198,7 @@ public class PostsService {
                 .content(post.getContent())
                 .frameImg(post.getFrameImg())
                 .likeCount(post.getLikecount())
+                .commentCount(post.getCommentCount())
                 .createTime(post.getCreatedDate())
                 .modifyTime(post.getModifiedDate())
                 .Hashtags(post.getPostsHashtags().stream()
@@ -207,5 +220,11 @@ public class PostsService {
                 .postImages(post.getImages())
                 .build();
     }
-    
+    @Transactional
+    public PostsDto postClick(Long postId) {
+        Posts posts = postsRepository.findById(postId)
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 존재하지 않습니다. id" +postId));
+        return convertToDto(posts);
+    }
 }
