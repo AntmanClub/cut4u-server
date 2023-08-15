@@ -1,5 +1,7 @@
 package antmanclub.cut4userver.likes.service;
 
+import antmanclub.cut4userver.global.error.ErrorCode;
+import antmanclub.cut4userver.global.error.exception.EntityNotFoundException;
 import antmanclub.cut4userver.likes.domain.Likes;
 import antmanclub.cut4userver.likes.repository.LikesRepository;
 import antmanclub.cut4userver.posts.domain.Posts;
@@ -28,13 +30,16 @@ public class LikesService {
     @Transactional
     public SuccessResponseDto addLike(Long postId) {
         Posts posts = postsRepository.findById(postId)
-                .orElseThrow(()-> new IllegalArgumentException("해당 id의 게시물이 없습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 없습니다. id: "+postId));
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "현재 접속중인 유저가 없습니다."));
         //좋아요작 방지
         Optional<Likes> likes = likesRepository.findByPostAndUser(posts, user);
         if (likes.isPresent()) {
-            throw new IllegalStateException("해당 멤버는 이미 이 게시물을 좋아했습니다.");
+            throw new EntityNotFoundException(ErrorCode.CAN_NOT_LIKE_POSTS,
+                    "해당 유저는 이미 이 게시물을 좋아했습니다.");
         }else {
             Likes like = Likes.builder()
                     .posts(posts)
@@ -50,11 +55,14 @@ public class LikesService {
     @Transactional
     public SuccessResponseDto deleteLike(Long postId) {
         User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("현재 접속중인 유저가 없습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "현재 접속중인 유저가 없습니다."));
         Posts posts = postsRepository.findById(postId)
-                .orElseThrow(()-> new IllegalArgumentException("해당 id의 게시물이 없습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 없습니다. id: "+postId));
         Likes likes = likesRepository.findByPostAndUser(posts, user)
-                .orElseThrow(()->new IllegalArgumentException(user.getName()+"는 해당 게시물에 좋아요를 누르지 않았습니다."));
+                .orElseThrow(()->new EntityNotFoundException(ErrorCode.CAN_NOT_UNLIKE_POSTS,
+                        user.getName()+"는 해당 게시물에 좋아요를 누르지 않았습니다."));
         likesRepository.delete(likes);
         posts.subLikeCount();
         return SuccessResponseDto.builder().success(true).build();
@@ -62,7 +70,8 @@ public class LikesService {
     @Transactional
     public List<UserListResponseDto> userList(Long postsId) {
         Posts posts = postsRepository.findById(postsId)
-                .orElseThrow(()-> new IllegalArgumentException("해당 id의 게시물이 없습니다."));
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
+                        "해당 id의 게시물이 없습니다. id: "+postsId));
         List<Likes> likes = posts.getLikes();
         return likes.stream().map(user->{
             UserListResponseDto dto = new UserListResponseDto();

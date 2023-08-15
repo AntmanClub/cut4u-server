@@ -23,12 +23,12 @@ public enum ErrorCode
     POSTS_NOT_FOUND(400, "P002", "게시물을 찾을 수 없습니다."),
     POSTS_CAN_NOT_DELETE(400, "P003", "게시물을 삭제할 수 없습니다."),
 
-
     // Comment
     TODOLIST_NOT_FOUND(400, "T001", "존재 하지 않는 투두리스트입니다"),
 
     // Likes
-    Category_NOT_FOUND(400, "C001", "존재하지 않는 카테고리입니다.")
+    CAN_NOT_LIKE_POSTS(400, "C001", "좋아요를 누를 수 없습니다."),
+    CAN_NOT_UNLIKE_POSTS(400, "C001", "좋아요를 취소할 수 없습니다.")
     ;
 
     private final int status;
