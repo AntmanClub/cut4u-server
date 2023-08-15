@@ -24,7 +24,7 @@ public class UserService {
     private final FollowRepository followRepository;
 
     @Transactional
-    public SuccessResponseDto login(LoginRequestDto loginRequestDto) {
+    public String login(LoginRequestDto loginRequestDto) {
         userRepository.findByEmail(loginRequestDto.getEmail()).ifPresent(m -> {
             if(!securityConfig.getPasswordEncoder().matches(loginRequestDto.getPassword(), m.getPassword())){
                 throw new IllegalStateException("비밀번호가 틀렸습니다");
@@ -35,7 +35,7 @@ public class UserService {
                 .orElseThrow(()-> new IllegalArgumentException("해당 유저가 없습니다"));
         currentUser.setName(user.getName());
         currentUser.setEmail(user.getEmail());
-        return SuccessResponseDto.builder().success(true).build();
+        return user.getName();
     }
 
     @Transactional

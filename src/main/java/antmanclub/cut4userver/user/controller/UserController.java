@@ -1,10 +1,13 @@
 package antmanclub.cut4userver.user.controller;
 
 import antmanclub.cut4userver.aws.AwsUpload;
+import antmanclub.cut4userver.global.result.ResultCode;
+import antmanclub.cut4userver.global.result.ResultResponse;
 import antmanclub.cut4userver.user.dto.*;
 import antmanclub.cut4userver.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,8 +22,9 @@ public class UserController {
     private final AwsUpload awsUpload;
 
     @PostMapping("/login")
-    public SuccessResponseDto login(@RequestBody LoginRequestDto loginRequestDto){
-        return userService.login(loginRequestDto);
+    public ResponseEntity<ResultResponse> login(@RequestBody LoginRequestDto loginRequestDto){
+        String name = userService.login(loginRequestDto);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.USER_LOGIN_SUCCESS, name));
     }
 
     @PostMapping("/join")
