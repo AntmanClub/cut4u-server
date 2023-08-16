@@ -5,14 +5,10 @@ import lombok.Getter;
 
 @Getter
 public class FollowerListResponseDto {
-    private Long id;
-    private String email;
     private String name;
     private String profileimg;
 
     public FollowerListResponseDto(User entity) {
-        this.id = entity.getId();
-        this.email = entity.getEmail();
         this.name = entity.getName();
         this.profileimg = entity.getProfileimg();
     }

@@ -133,7 +133,6 @@ public class PostsService {
     public List<PostsDto> postsListToPostsDtoList(List<Posts> postsList){
         return postsList.stream()
                 .map(post -> PostsDto.builder()
-                        .userId(post.getUser().getId())
                         .userName(post.getUser().getName())
                         .profileImg(post.getUser().getProfileimg())
                         .postsId(post.getId())
@@ -141,7 +140,7 @@ public class PostsService {
                         .title(post.getTitle())
                         .content(post.getContent())
                         .likeCount(post.getLikecount())
-                        .commentCount(post.getCommentCount())
+                        .commentCount(post.getCommentsCount())
                         .createTime(post.getCreatedDate())
                         .modifyTime(post.getModifiedDate())
                         .frameImg(post.getFrameImg())
@@ -153,13 +152,14 @@ public class PostsService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public ProfileResponseDto userPostsList(String userEmail) {
+    public ProfileResponseDto userPostsList(String userName) {
         // find user with userEmail
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByName(userName)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "해당 email의 유저가 업습니다. email: "+userEmail));
+                        "해당 Name의 유저가 없습니다. name: "+userName));
         ProfileResponseDto profileResponseDto = new ProfileResponseDto();
         profileResponseDto.setName(user.getName());
+        profileResponseDto.setEmail(user.getEmail());
         profileResponseDto.setProfileImg(user.getProfileimg());
         profileResponseDto.setPostCount(user.getPostsList().size());
         profileResponseDto.setFollowerCount(user.getFollowing().size());
@@ -177,6 +177,7 @@ public class PostsService {
                         "현재 접속중인 유저가 없습니다."));
         ProfileResponseDto profileResponseDto = new ProfileResponseDto();
         profileResponseDto.setName(user.getName());
+        profileResponseDto.setEmail(user.getEmail());
         profileResponseDto.setProfileImg(user.getProfileimg());
         profileResponseDto.setPostCount(user.getPostsList().size());
         profileResponseDto.setFollowerCount(user.getFollowing().size());
@@ -189,7 +190,6 @@ public class PostsService {
     }
     private PostsDto convertToDto(Posts post) {
         return PostsDto.builder()
-                .userId(post.getUser().getId())
                 .userName(post.getUser().getName())
                 .profileImg(post.getUser().getProfileimg())
                 .postsId(post.getId())
@@ -198,7 +198,7 @@ public class PostsService {
                 .content(post.getContent())
                 .frameImg(post.getFrameImg())
                 .likeCount(post.getLikecount())
-                .commentCount(post.getCommentCount())
+                .commentCount(post.getCommentsCount())
                 .createTime(post.getCreatedDate())
                 .modifyTime(post.getModifiedDate())
                 .Hashtags(post.getPostsHashtags().stream()

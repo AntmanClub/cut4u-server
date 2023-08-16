@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class UserFollowRequestDto {
-    private Long id;
+    private String name;
 }

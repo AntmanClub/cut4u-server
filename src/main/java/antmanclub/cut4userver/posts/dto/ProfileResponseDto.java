@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 public class ProfileResponseDto {
     private String name;
+    private String email;
     private String profileImg;
     private int postCount;
     private int followerCount;

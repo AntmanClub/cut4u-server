@@ -32,7 +32,7 @@ public class Posts extends BaseTimeEntity{
 
     private int likecount = 0;
 
-    private int commentCount = 0;
+    private int commentsCount = 0;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")
@@ -80,9 +80,9 @@ public class Posts extends BaseTimeEntity{
     }
 
     public void addCommentsCount() {
-        this.commentCount++;
+        this.commentsCount++;
     }
     public void subCommentsCount(){
-        this.commentCount--;
+        this.commentsCount--;
     }
 }

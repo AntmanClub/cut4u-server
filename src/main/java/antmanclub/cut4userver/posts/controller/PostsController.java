@@ -5,6 +5,7 @@ import antmanclub.cut4userver.global.result.ResultResponse;
 import antmanclub.cut4userver.posts.dto.*;
 import antmanclub.cut4userver.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,16 +24,10 @@ public class PostsController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_FEED_GET_LIST_SUCCESS, data));
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<ResultResponse> add(@RequestParam(value = "files") List<MultipartFile> files, @RequestParam(value = "title") String title,
-                                    @RequestParam(value = "content") String content, @RequestParam(value = "hashTags") List<String> hashTags,
-                                    @RequestParam(value = "frameImg") String frameImg){
-        PostsAddRequestDto postsAddRequestDto = PostsAddRequestDto.builder()
-                .title(title)
-                .content(content)
-                .hashtags(hashTags)
-                .frameImg(frameImg)
-                .build();
+    @PostMapping(value = "/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ResultResponse> add(
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart(value = "postsAddRequest", required = false) PostsAddRequestDto postsAddRequestDto){
         PostsListResponseDto data = postsService.add(files, postsAddRequestDto);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_ADD_SUCCESS, data));
     }
@@ -43,9 +38,9 @@ public class PostsController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_DELETE_SUCCESS, data));
     }
 
-    @GetMapping("/{userEmail}")
-    public ResponseEntity<ResultResponse> userPostsList(@PathVariable(value = "userEmail") String userEmail){
-        ProfileResponseDto data = postsService.userPostsList(userEmail);
+    @GetMapping("/{userName}")
+    public ResponseEntity<ResultResponse> userPostsList(@PathVariable(value = "userName") String userName){
+        ProfileResponseDto data = postsService.userPostsList(userName);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_PROFILE_GET_SUCCESS, data));
     }
     @GetMapping("/myprofile")

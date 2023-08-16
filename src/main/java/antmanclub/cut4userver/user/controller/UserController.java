@@ -60,14 +60,14 @@ public class UserController {
         String data = userService.userUnfollow(userFollowRequestDto);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.USER_FOLLOW_DELETE_SUCCESS, data));
     }
-    @GetMapping("/following/list/{userId}")
-    public ResponseEntity<ResultResponse> followingList(@PathVariable Long userId){
-        List<FollowingListResponseDto> data = userService.followingList(userId);
+    @GetMapping("/following/list/{userName}")
+    public ResponseEntity<ResultResponse> followingList(@PathVariable String userName){
+        List<FollowingListResponseDto> data = userService.followingList(userName);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.USER_FOLLOWING_LIST_GET_SUCCESS, data));
     }
-    @GetMapping("/follower/list/{userId}")
-    public ResponseEntity<ResultResponse> followerList(@PathVariable Long userId){
-        List<FollowerListResponseDto> data = userService.followerList(userId);
+    @GetMapping("/follower/list/{userName}")
+    public ResponseEntity<ResultResponse> followerList(@PathVariable String userName){
+        List<FollowerListResponseDto> data = userService.followerList(userName);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.USER_FOLLOWER_LIST_GET_SUCCESS, data));
     }
     @GetMapping("/search/{name}")

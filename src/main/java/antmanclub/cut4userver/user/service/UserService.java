@@ -100,9 +100,9 @@ public class UserService {
         User user = userRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
                         "접속중인 유저가 존재하지 않습니다."));
-        User followingUser = userRepository.findById(userFollowRequestDto.getId())
+        User followingUser = userRepository.findByName(userFollowRequestDto.getName())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "해당 id의 유저가 존재하지 않습니다. id"+userFollowRequestDto.getId()));
+                        "해당 name의 유저가 존재하지 않습니다. id"+userFollowRequestDto.getName()));
         if (user.getId().equals(followingUser.getId())) {
             throw new EntityNotFoundException(ErrorCode.CAN_NOT_FOLLOW_MYSELF,
                     "접속한 유저 이름: "+user.getName()+"팔로우하려는 유저 이름: "+followingUser.getName());
@@ -127,9 +127,9 @@ public class UserService {
         User user = userRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
                         "접속중인 유저가 존재하지 않습니다."));
-        User followingUser = userRepository.findById(userFollowRequestDto.getId())
+        User followingUser = userRepository.findByName(userFollowRequestDto.getName())
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "해당 id의 유저가 존재하지 않습니다. id: "+userFollowRequestDto.getId()));
+                        "해당 이름의 유저가 존재하지 않습니다. name: "+userFollowRequestDto.getName()));
         if (user.getId().equals(followingUser.getId())) {
             throw new EntityNotFoundException(ErrorCode.CAN_NOT_UNFOLLOW_MYSELF,
                     "접속한 유저 이름: "+user.getName()+"언팔로우하려는 유저 이름: "+followingUser.getName());
@@ -142,10 +142,10 @@ public class UserService {
         return followingUser.getName();
     }
     @Transactional
-    public List<FollowingListResponseDto> followingList(Long userId) {
-        User user = userRepository.findById(userId)
+    public List<FollowingListResponseDto> followingList(String userName) {
+        User user = userRepository.findByName(userName)
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "해당 id의 유저가 존재하지 않습니다. id: "+userId));
+                        "해당 이름의 유저가 존재하지 않습니다. name: "+userName));
         List<User> followerUsers = user.getFollowers().stream()
                 .map(Follow::getFollower)
                 .toList();
@@ -154,10 +154,10 @@ public class UserService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public List<FollowerListResponseDto> followerList(Long userId) {
-        User user = userRepository.findById(userId)
+    public List<FollowerListResponseDto> followerList(String userName) {
+        User user = userRepository.findByName(userName)
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "해당 id의 유저가 존재하지 않습니다. id: "+userId));
+                        "해당 이름의 유저가 존재하지 않습니다. name: "+userName));
         List<User> followingUsers = user.getFollowing().stream()
                 .map(Follow::getFollowee)
                 .toList();

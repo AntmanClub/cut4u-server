@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @Builder
 public class PostsDto {
-    private Long userId;
     private String userName;
     private String profileImg;
     private Long postsId;
