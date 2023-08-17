@@ -59,7 +59,7 @@ public class LikesService {
                         "현재 접속중인 유저가 없습니다."));
         Posts posts = postsRepository.findById(postId)
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.POSTS_NOT_FOUND,
-                        "해당 id의 게시물이 없습니다. id: "+postId));
+                        "해당 id의 게시물을 찾을 수 없습니다. id: "+postId));
         Likes likes = likesRepository.findByPostAndUser(posts, user)
                 .orElseThrow(()->new EntityNotFoundException(ErrorCode.CAN_NOT_UNLIKE_POSTS,
                         user.getName()+"는 해당 게시물에 좋아요를 누르지 않았습니다."));
