@@ -4,18 +4,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @NoArgsConstructor
 public class UserProfileUpdateRequestDto {
     private String email;
     private String name;
-    private String profileimg;
 
     @Builder
-    public UserProfileUpdateRequestDto(String email, String name, String profileimg){
+    public UserProfileUpdateRequestDto(String email, String name, MultipartFile profileimg){
         this.email = email;
         this.name = name;
-        this.profileimg = profileimg;
     }
 }

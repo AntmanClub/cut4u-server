@@ -1,5 +1,6 @@
 package antmanclub.cut4userver.user.service;
 
+import antmanclub.cut4userver.aws.AwsUpload;
 import antmanclub.cut4userver.config.SecurityConfig;
 import antmanclub.cut4userver.follow.domain.Follow;
 import antmanclub.cut4userver.follow.repository.FollowRepository;
@@ -12,7 +13,9 @@ import antmanclub.cut4userver.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +29,7 @@ public class UserService {
     private final SecurityConfig securityConfig = new SecurityConfig();
     private final CurrentUser currentUser;
     private final FollowRepository followRepository;
+    private final AwsUpload awsUpload;
 
     @Transactional
     public String login(LoginRequestDto loginRequestDto) {
@@ -85,7 +89,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserProfileUpdateResponseDto editProfile(UserProfileUpdateRequestDto userProfileUpdateRequestDto) {
+    public UserProfileUpdateResponseDto editProfile(UserProfileUpdateRequestDto userProfileUpdateRequestDto, MultipartFile image) throws IOException {
         userRepository.findByName(userProfileUpdateRequestDto.getName())
                 .ifPresent(m -> {
                     throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_NAME,
@@ -95,10 +99,11 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
                         "해당 이에일을 가진 유저가 없습니다 email: "+userProfileUpdateRequestDto.getEmail()));
         user.setName(userProfileUpdateRequestDto.getName());
-        user.setProfileimg(userProfileUpdateRequestDto.getProfileimg());
+        String imgsrc = awsUpload.upload(image, "image");
+        user.setProfileimg(imgsrc);
         return UserProfileUpdateResponseDto.builder()
                 .name(userProfileUpdateRequestDto.getName())
-                .profileimg(userProfileUpdateRequestDto.getProfileimg())
+                .profileimg(imgsrc)
                 .build();
     }
 

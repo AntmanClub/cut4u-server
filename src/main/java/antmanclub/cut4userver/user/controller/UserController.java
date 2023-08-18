@@ -3,6 +3,8 @@ package antmanclub.cut4userver.user.controller;
 import antmanclub.cut4userver.aws.AwsUpload;
 import antmanclub.cut4userver.global.result.ResultCode;
 import antmanclub.cut4userver.global.result.ResultResponse;
+import antmanclub.cut4userver.posts.dto.PostsAddRequestDto;
+import antmanclub.cut4userver.posts.dto.PostsListResponseDto;
 import antmanclub.cut4userver.user.dto.*;
 import antmanclub.cut4userver.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,17 +39,13 @@ public class UserController {
         String data = userService.emailDupleCheck(email);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.USER_EMAIL_VALIDATE, data));
     }
-    @PatchMapping(path="/editProfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResultResponse> editProfile(@RequestParam(value="image") MultipartFile image,
-                                                    @RequestParam(value="name") String name,
-                                                    @RequestParam(value = "email") String email)
-            throws IOException {
-        String imgSrc = awsUpload.upload(image, "image");
+    @PatchMapping(path="/editProfile", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ResultResponse> editProfile(@RequestPart(value="image", required = false) MultipartFile image,
+                                                    @RequestPart(value="editRequest", required = false) UserProfileUpdateRequestDto userProfileUpdateRequestDto) throws IOException {
         UserProfileUpdateResponseDto data = userService.editProfile(UserProfileUpdateRequestDto.builder()
-                .name(name)
-                .email(email)
-                .profileimg(imgSrc)
-                .build());
+                .name(userProfileUpdateRequestDto.getName())
+                .email(userProfileUpdateRequestDto.getEmail())
+                .build(), image);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.USER_PROFILE_EDIT_SUCCESS, data));
     }
     @PostMapping("/follow")
