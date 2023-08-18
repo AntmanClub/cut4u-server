@@ -17,6 +17,7 @@ public enum ErrorCode
     ALREADY_FOLLOW_USER(200, "400", "이미 팔로우한 유저입니다."),
     CAN_NOT_UNFOLLOW_MYSELF(200, "400", "자기 자신은 언팔로우할 수 없습니다."),
     NOT_FOLLOW_USER(200, "400", "팔로우하지 않은 유저입니다."),
+    NOT_VALID_EMAIL_PASSWORD(200, "400", "유효하지 않은 이메일 또는 비밀번호입니다."),
 
     // Posts
     POSTS_PIC_NOT_FOUR(200, "400", "사진의 개수가 4장이 아닙니다."),

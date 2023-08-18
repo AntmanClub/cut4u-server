@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,6 +75,12 @@ public class UserService {
             throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_EMAIL,
                     "이미 존재하는 이메일 입니다.");
         });
+        String emailReg = "/([\\w-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$/";
+        Pattern pattern = Pattern.compile(emailReg);
+        if(!pattern.matcher(email).matches()){
+            throw new EntityNotFoundException(ErrorCode.NOT_VALID_EMAIL_PASSWORD,
+                    "유효하지 않은 이메일 형식입니다.");
+        }
         return email;
     }
 
