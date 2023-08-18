@@ -31,13 +31,13 @@ public class UserService {
         userRepository.findByEmail(loginRequestDto.getEmail()).ifPresent(m -> {
             if(!securityConfig.getPasswordEncoder().matches(loginRequestDto.getPassword(), m.getPassword())){
                 throw new EntityNotFoundException(ErrorCode.NOT_CORRECT_PASSWORD,
-                        "비밀번호가 틀렸습니다 password: "+ loginRequestDto.getPassword());
+                        "이메일이 또는 비밀번호가 틀렸습니다.");
             }
         });
         //비밀번호가 맞으면 해당 이메일은 고유하므로 로그인 성공
         User user = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "이메일에 해당하는 유저가 없습니다. Email : "+ loginRequestDto.getEmail()));
+                        "이메일이 또는 비밀번호가 틀렸습니다."));
         currentUser.setName(user.getName());
         currentUser.setEmail(user.getEmail());
         return user.getName();
@@ -55,7 +55,7 @@ public class UserService {
         });
         if (!Objects.equals(requestDto.getPassword(), requestDto.getConfirmPassword())) {
             throw new EntityNotFoundException(ErrorCode.NOT_EQUAL_PASSWORD,
-                    "비밀번호: "+requestDto.getPassword()+" 비밀번호 확인: "+requestDto.getConfirmPassword());
+                    "비밀번호가 일치하지 않습니다.");
         }
         System.out.println(requestDto.getPassword());
         String encodePw = securityConfig.getPasswordEncoder().encode(requestDto.getPassword());
@@ -72,7 +72,7 @@ public class UserService {
     public String emailDupleCheck(String email) {
         userRepository.findByEmail(email).ifPresent(m -> {
             throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_EMAIL,
-                    "이미 존재하는 이메일 email:" +email);
+                    "이미 존재하는 이메일 입니다.");
         });
         return email;
     }
