@@ -32,7 +32,7 @@ public class PostsController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_ADD_SUCCESS, data));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("")
     public ResponseEntity<ResultResponse> delete(@RequestParam(value="postsId") Long postsId){
         PostsListResponseDto data = postsService.delete(postsId);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_DELETE_SUCCESS, data));
@@ -42,11 +42,6 @@ public class PostsController {
     public ResponseEntity<ResultResponse> userPostsList(@PathVariable(value = "userName") String userName){
         ProfileResponseDto data = postsService.userPostsList(userName);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_PROFILE_GET_SUCCESS, data));
-    }
-    @GetMapping("/myprofile")
-    public ResponseEntity<ResultResponse> myProfile(){
-        ProfileResponseDto data = postsService.myProfile();
-        return ResponseEntity.ok(ResultResponse.of(ResultCode.POSTS_GET_MY_PROFILE_SUCCESS, data));
     }
     @GetMapping("/search")
     public ResponseEntity<ResultResponse> searchTab(){

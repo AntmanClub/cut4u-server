@@ -6,6 +6,9 @@ import antmanclub.cut4userver.follow.domain.Follow;
 import antmanclub.cut4userver.follow.repository.FollowRepository;
 import antmanclub.cut4userver.global.error.ErrorCode;
 import antmanclub.cut4userver.global.error.exception.EntityNotFoundException;
+import antmanclub.cut4userver.posts.domain.Posts;
+import antmanclub.cut4userver.posts.dto.PostsDto;
+import antmanclub.cut4userver.posts.dto.ProfileResponseDto;
 import antmanclub.cut4userver.user.SemiToken.CurrentUser;
 import antmanclub.cut4userver.user.domain.User;
 import antmanclub.cut4userver.user.dto.*;
@@ -58,6 +61,12 @@ public class UserService {
             throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_EMAIL,
                     "이미 존재하는 이메일 email: "+requestDto.getEmail());
         });
+        String emailReg = "([\\w-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
+        Pattern pattern = Pattern.compile(emailReg);
+        if(!pattern.matcher(requestDto.getEmail()).matches()){
+            throw new EntityNotFoundException(ErrorCode.NOT_VALID_EMAIL_PASSWORD,
+                    "유효하지 않은 이메일 형식입니다.");
+        }
         if (!Objects.equals(requestDto.getPassword(), requestDto.getConfirmPassword())) {
             throw new EntityNotFoundException(ErrorCode.NOT_EQUAL_PASSWORD,
                     "비밀번호가 일치하지 않습니다.");
@@ -79,7 +88,7 @@ public class UserService {
             throw new EntityNotFoundException(ErrorCode.ALREADY_EXIST_EMAIL,
                     "이미 존재하는 이메일 입니다.");
         });
-        String emailReg = "/([\\w-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$/";
+        String emailReg = "([\\w-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
         Pattern pattern = Pattern.compile(emailReg);
         if(!pattern.matcher(email).matches()){
             throw new EntityNotFoundException(ErrorCode.NOT_VALID_EMAIL_PASSWORD,
@@ -191,14 +200,57 @@ public class UserService {
         }).collect(Collectors.toList());
     }
     @Transactional
-    public UserListResponseDto searchHardName(String name) {
+    public ProfileResponseDto searchHardName(String name) {
         User user = userRepository.findByName(name)
                 .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
                         "해당 이름의 유저가 없습니다. name: "+name));
-        UserListResponseDto userListResponseDto = new UserListResponseDto();
-        userListResponseDto.setName(user.getName());
-        userListResponseDto.setEmail(user.getEmail());
-        userListResponseDto.setProfileImg(user.getProfileimg());
-        return userListResponseDto;
+        ProfileResponseDto profileResponseDto = new ProfileResponseDto();
+        profileResponseDto.setName(user.getName());
+        profileResponseDto.setEmail(user.getEmail());
+        profileResponseDto.setProfileImg(user.getProfileimg());
+        profileResponseDto.setPostCount(user.getPostsList().size());
+        profileResponseDto.setFollowerCount(user.getFollowing().size());
+        profileResponseDto.setFollowingCount(user.getFollowers().size());
+        List<PostsDto> postsDtos = user.getPostsList().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        profileResponseDto.setPostsDtoList(postsDtos);
+        return profileResponseDto;
+    }
+    @jakarta.transaction.Transactional
+    public ProfileResponseDto myProfile() {
+        User user = userRepository.findByEmail(currentUser.getEmail())
+                .orElseThrow(()->new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
+                        "현재 접속중인 유저가 없습니다."));
+        ProfileResponseDto profileResponseDto = new ProfileResponseDto();
+        profileResponseDto.setName(user.getName());
+        profileResponseDto.setEmail(user.getEmail());
+        profileResponseDto.setProfileImg(user.getProfileimg());
+        profileResponseDto.setPostCount(user.getPostsList().size());
+        profileResponseDto.setFollowerCount(user.getFollowing().size());
+        profileResponseDto.setFollowingCount(user.getFollowers().size());
+        List<PostsDto> postsDtos = user.getPostsList().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        profileResponseDto.setPostsDtoList(postsDtos);
+        return profileResponseDto;
+    }
+    private PostsDto convertToDto(Posts post) {
+        return PostsDto.builder()
+                .userName(post.getUser().getName())
+                .profileImg(post.getUser().getProfileimg())
+                .postsId(post.getId())
+                .postImages(post.getImages())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .frameImg(post.getFrameImg())
+                .likeCount(post.getLikecount())
+                .commentCount(post.getCommentsCount())
+                .createTime(post.getCreatedDate())
+                .modifyTime(post.getModifiedDate())
+                .Hashtags(post.getPostsHashtags().stream()
+                        .map(ph -> ph.getHashtag().getHashtag())
+                        .collect(Collectors.toList()))
+                .build();
     }
 }

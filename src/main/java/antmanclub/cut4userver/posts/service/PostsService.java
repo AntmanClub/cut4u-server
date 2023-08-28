@@ -170,24 +170,7 @@ public class PostsService {
         profileResponseDto.setPostsDtoList(postsDtos);
         return profileResponseDto;
     }
-    @Transactional
-    public ProfileResponseDto myProfile() {
-        User user = userRepository.findByEmail(currentUser.getEmail())
-                .orElseThrow(()->new EntityNotFoundException(ErrorCode.USER_NOT_FOUND,
-                        "현재 접속중인 유저가 없습니다."));
-        ProfileResponseDto profileResponseDto = new ProfileResponseDto();
-        profileResponseDto.setName(user.getName());
-        profileResponseDto.setEmail(user.getEmail());
-        profileResponseDto.setProfileImg(user.getProfileimg());
-        profileResponseDto.setPostCount(user.getPostsList().size());
-        profileResponseDto.setFollowerCount(user.getFollowing().size());
-        profileResponseDto.setFollowingCount(user.getFollowers().size());
-        List<PostsDto> postsDtos = user.getPostsList().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-        profileResponseDto.setPostsDtoList(postsDtos);
-        return profileResponseDto;
-    }
+
     private PostsDto convertToDto(Posts post) {
         return PostsDto.builder()
                 .userName(post.getUser().getName())

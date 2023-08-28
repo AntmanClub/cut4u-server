@@ -21,7 +21,7 @@ public class LikesController {
         boolean data = likesService.addLike(postId);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.LIKE_SAVE_SUCCESS, data));
     }
-    @DeleteMapping("/delete/{postId}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<ResultResponse> deleteLike(@PathVariable Long postId){
         boolean data = likesService.deleteLike(postId);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.LIKE_DELETE_SUCCESS, data));
